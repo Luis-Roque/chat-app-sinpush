@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:uicslp_chat/helpers/mostrar_alerta.dart';
+import 'package:uicslp_chat/services/auth_service.dart';
 
 import 'package:uicslp_chat/widgets/Labels_login.dart';
 import 'package:uicslp_chat/widgets/btn_login.dart';
@@ -46,6 +49,8 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+
+    final authService = Provider.of<AuthService>(context);
     return Container(
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -67,9 +72,19 @@ class __FormState extends State<_Form> {
 
           btnIngresar(
             text: 'Ingresar',
-            onPressed: (){
-              print(correoCtrl);
-              print(contraCtrl);
+            onPressed: authService.autenticando ? null : ()async{
+              
+              FocusScope.of(context).unfocus();
+              final loginOk= await authService.login(correoCtrl.text.trim(), contraCtrl.text.trim());
+              
+              if (loginOk ){
+                //TODO: conectar a nuestro socket server
+                //Navegar a otra pantalla
+                Navigator.pushReplacementNamed(context, 'usuarios');
+              } else{
+                //Mostrar alerta
+                mostrarAlerta(context, 'Usuario incorrecto', 'Verifique su correo electrónico');
+              }
             },
             ),
         ],
